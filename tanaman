@@ -1,0 +1,48 @@
+#include "CTBot.h"
+CTBot myBot;
+
+String ssid  = "namawifi"    ; 
+String pass  = "password wifi"; 
+String token = "5161449975:AAGRYA4wFEPBoVMJ9MznjlBj6g6l9Mv2ey8"; // token telegram
+const int id = 2096692197; // id telegram
+
+int sensorSoil = D2;
+int pompaAir = D3;
+
+void setup() {
+	
+    pinMode(sensorSoil,INPUT);
+    pinMode(pompaAir, OUTPUT);
+
+	Serial.begin(115200);
+	Serial.println("Starting TelegramBot...");
+
+	myBot.wifiConnect(ssid, pass);
+	myBot.setTelegramToken(token);
+	
+	if (myBot.testConnection()){
+		Serial.println("\nTerkoneksi");}
+	else{
+		Serial.println("\nTidak Terkoneksi");
+   }
+   
+}
+
+
+void loop() {
+   TBMessage msg;
+
+	 int bacaSensor = analogRead(sensorSoil);
+
+  if(bacaSensor>400){
+   myBot.sendMessage(id,"Tanaman kering. Silahkan siram!");
+      Serial.println("send");
+  }
+  if (myBot.getNewMessage(msg)) {
+    if (msg.text.equalsIgnoreCase("Pompa air on")) {                   //Perintah dari telegram ke perangkat
+     digitalWrite(pompaAir, HIGH);
+     delay(100);  
+     myBot.sendMessage(msg.sender.id, "Pompa sedang menyiram"); //Balasan dari perangkat ke Bot Telegram
+    }
+    }
+}
